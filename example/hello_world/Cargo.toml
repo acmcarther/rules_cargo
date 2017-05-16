@@ -1,0 +1,8 @@
+[package]
+name = "hello_world"
+version = "0.0.1"
+authors = ["Alex McArther <acmcarther@gmail.com>"]
+
+[dependencies]
+libc = "0.2.22"
+backtrace = "0.3.0"
