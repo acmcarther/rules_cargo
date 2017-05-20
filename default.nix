@@ -6,9 +6,11 @@ in pkgs.stdenv.mkDerivation rec {
   propagatedBuildInputs = with pkgs; [
     bash
     patchelf
+    openssl
     openssl.dev
     pkgconfig
     zlib
+    zlib.dev
     cmake
     python
   ];

@@ -40,8 +40,9 @@ def _build_cargo_command(ctx):
 
   return " ".join(
       [
-      "LD_LIBRARY_PATH=../%s" % toolchain.rustc_lib_path,
-      "DYLD_LIBRARY_PATH=../%s" % toolchain.rustc_lib_path,
+      "LD_LIBRARY_PATH=../%s:$LD_LIBRARY_PATH" % toolchain.rustc_lib_path,
+      "PKG_CONFIG_PATH=$LD_LIBRARY_PATH",
+      "DYLD_LIBRARY_PATH=../%s:$DYLD_LIBRARY_PATH" % toolchain.rustc_lib_path,
       "RUSTC=$PWD/../%s" % toolchain.rustc_path,
       "RUSTDOC=$PWD/../%s" % toolchain.rustdoc_path,
       "RUST_BACKTRACE=1",
@@ -59,10 +60,8 @@ def _build_cargo_command(ctx):
       "%s" % " ".join(ctx.attr.cargo_flags),
       "--%s" % ctx.attr.profile,
       ])
-          #])
 
-
-def _cargo_binary_tar_impl(ctx):
+def _cargo_binary_impl(ctx):
     """Implementation for the cargo_binary Skylark rule."""
 
 
@@ -98,7 +97,7 @@ cp ./target/{profile}/{crate_name} ../{output}
             ctx.file._rustc,
         ],
         outputs = [ctx.outputs.executable],
-        mnemonic = "build",
+        mnemonic = "CargoBinary",
         command = cmd,
         use_default_shell_env = True,
         progress_message = "Cargo: compiling {}".format(ctx.attr.name),
@@ -107,8 +106,8 @@ cp ./target/{profile}/{crate_name} ../{output}
     return struct()
 
 
-cargo_binary_tar = rule(
-    _cargo_binary_tar_impl,
+cargo_binary = rule(
+    _cargo_binary_impl,
     executable = True,
     fragments = ["cpp"],
     attrs = {
@@ -153,3 +152,66 @@ cargo_binary_tar = rule(
         ),
     }
 )
+
+def _cargo_rlib_impl(ctx):
+    #output = ctx.new_file(ctx.outputs.rlib.path)
+    rlib_prefix = "lib%s" % ctx.attr.name
+    if ctx.attr.rlib_prefix != "":
+      rlib_prefix = ctx.attr.rlib_prefix
+
+    matches = []
+    for out in ctx.files.compiled_source:
+        if out.basename.startswith(rlib_prefix):
+            matches.append(out)
+
+    if len(matches) == 0:
+      fail("Couldn't find file starting with %s" % rlib_prefix)
+    elif len(matches) > 1:
+      fail("rlib_prefix \"%s\" was ambiguous, found %s" % (rlib_prefix, matches))
+
+    out = matches[0]
+    ctx.action(
+        inputs = [out],
+        outputs = [ctx.outputs.rlib],
+        mnemonic = "ExtractRlib",
+        arguments = [
+            out.path,
+            ctx.outputs.rlib.path,
+        ],
+        command = "cp $1 $2",
+        progress_message = "Copying {} from cargo".format(ctx.attr.name),
+        use_default_shell_env = True,
+    )
+
+    return struct(
+        rust_lib = ctx.outputs.rlib,
+        transitive_libs = [],
+    )
+
+cargo_rlib = rule(
+    _cargo_rlib_impl,
+    attrs = {
+        "compiled_source": attr.label(
+            mandatory = True,
+        ),
+        "rlib_prefix": attr.string(),
+    },
+    outputs = {
+        "rlib": "lib%{name}_lib.rlib",
+    }
+)
+
+
+def cargo_export(name, crate_tar, exports, visibility=None):
+  #cargo_compile(
+      #      name = "%s_compiled_sources".format(name),
+      #  crate_tar = crate_tar,
+      #  outputs = exports.values(),
+      #)
+
+    for crate_name, path in exports.values():
+        cargo_rlib(
+            name = name + "_" + crate_name,
+            compiled_source = ":%s_compiled_sources".format(name),
+            path = path,
+        )
