@@ -11,7 +11,6 @@ load(
     "rule_test",
 )
 
-
 cargo_rlib(
     name = "url",
     compiled_source = "//test/precompiled_crate",
