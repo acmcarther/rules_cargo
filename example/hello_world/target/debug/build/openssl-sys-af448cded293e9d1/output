@@ -1,0 +1,31 @@
+cargo:rustc-link-search=native=/nix/store/yi9y16rwbsc9dihdz4198gh4jc1axzwa-openssl-1.0.2k/lib
+cargo:rustc-link-lib=ssl
+cargo:rustc-link-lib=dl
+cargo:rustc-link-lib=crypto
+cargo:rustc-link-lib=dl
+OPT_LEVEL = Some("0")
+TARGET = Some("x86_64-unknown-linux-gnu")
+HOST = Some("x86_64-unknown-linux-gnu")
+TARGET = Some("x86_64-unknown-linux-gnu")
+TARGET = Some("x86_64-unknown-linux-gnu")
+HOST = Some("x86_64-unknown-linux-gnu")
+CC_x86_64-unknown-linux-gnu = None
+CC_x86_64_unknown_linux_gnu = None
+HOST_CC = None
+CC = None
+HOST = Some("x86_64-unknown-linux-gnu")
+TARGET = Some("x86_64-unknown-linux-gnu")
+HOST = Some("x86_64-unknown-linux-gnu")
+CFLAGS_x86_64-unknown-linux-gnu = None
+CFLAGS_x86_64_unknown_linux_gnu = None
+HOST_CFLAGS = None
+CFLAGS = None
+PROFILE = Some("debug")
+running: "cc" "-O0" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-m64" "-I" "/nix/store/r2fglly33ihxw2m204jrzgqn0ic9m91j-openssl-1.0.2k-dev/include" "-E" "/home/alex/projects/rules_cargo/example/hello_world/target/debug/build/openssl-sys-af448cded293e9d1/out/expando.c"
+exit code: 0
+cargo:rustc-cfg=osslconf="OPENSSL_NO_KRB5"
+cargo:rustc-cfg=osslconf="OPENSSL_NO_RFC3779"
+cargo:conf=OPENSSL_NO_KRB5,OPENSSL_NO_RFC3779
+cargo:rustc-cfg=ossl102
+cargo:version=102
+cargo:include=/nix/store/r2fglly33ihxw2m204jrzgqn0ic9m91j-openssl-1.0.2k-dev/include

@@ -1,0 +1,8 @@
+[package]
+name = "anything"
+version = "0.0.1"
+
+[dependencies]
+rustc-serialize = "0.3"
+nom = "2.2.0"
+itertools = "0.6.0"
