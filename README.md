@@ -57,16 +57,26 @@ Handle dynamically linked transitive dependencies. An example is openssl: compil
 Full text of an external discussion:
 
 ```
-One thing I've been pursuing lately is a cargo_libraries type rule that supplies a list of libraries as declared from a cargo toml, building them in a shared environment.
+One thing I've been pursuing lately is a cargo_libraries type rule that supplies a list of libraries as
+declared from a cargo toml, building them in a shared environment.
 
-So far, this approach has been sufficient in generating a list of rlibs which can be surfaced for conventional rust_library or rust_binary rules. However, I've hit a sticking point: linking upstream dynamic dependencies. Heres an example:
+So far, this approach has been sufficient in generating a list of rlibs which can be surfaced for
+conventional rust_library or rust_binary rules. However, I've hit a sticking point: linking upstream
+dynamic dependencies. Heres an example:
 
 cargo_libraries("cargo_workspace") is depended on by
 cargo_rlib("openssl")              is depended on by
 rust_library("bazel_lib")
 
 
-cargo_libraries produces a series of ordinary rlibs from the result of a `cargo build` execution. cargo_rlib surfaces one rlib from that execution, as a rust_library compatible provider, and supplies the necessary transitive_dependencies. Finally, any ordinary rust_library can depend on that cargo_rlib as if it was another rust_library.
+cargo_libraries produces a series of ordinary rlibs from the result of a `cargo build` execution.
+cargo_rlib surfaces one rlib from that execution, as a rust_library compatible provider, and
+supplies the necessary transitive_dependencies. Finally, any ordinary rust_library can depend on
+that cargo_rlib as if it was another rust_library.
 
-My issue comes in on the build of rust_library("bazel_lib"): the rust rule attempts to link against crypto and ssl due to the upstream openssl dependency, which would be available, but the rust_library (and all other rust rules rules) clobbers ld_library_path. To be clear, cargo compiles the openssl crate just fine, but some linking dependencies remain -- which downstream rlibs detect and attempt to link in as well. At this point I've hit the end of my background, and I'm hoping you might have some ideas.
+My issue comes in on the build of rust_library("bazel_lib"): the rust rule attempts to link against
+crypto and ssl due to the upstream openssl dependency, which would be available, but the rust_library
+(and all other rust rules rules) clobbers ld_library_path. To be clear, cargo compiles the openssl
+crate just fine, but some linking dependencies remain -- which downstream rlibs detect and attempt
+to link in as well.
 ```
